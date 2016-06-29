@@ -2,6 +2,11 @@
 declare(strict_types=1);
 namespace Airship\Cabin\Bridge\Landing;
 
+use \Airship\Engine\Security\Filter\{
+    BoolFilter,
+    GeneralFilterContainer
+};
+
 require_once __DIR__.'/init_gear.php';
 
 /**
@@ -40,7 +45,11 @@ class Motifs extends AdminOnly
         $motifs = \Airship\loadJSON(
             ROOT . '/Cabin/' . $cabinName . '/config/motifs.json'
         );
-        $post = $this->post();
+        $filter = new GeneralFilterContainer();
+        foreach (\array_keys($motifs) as $i) {
+            $filter->addFilter('motifs.' . $i . '.enabled', new BoolFilter());
+        }
+        $post = $this->post($filter);
         if ($post) {
             if ($this->updateMotifs($motifs, $post, $cabinName)) {
                 \Airship\clear_cache();
